@@ -79,11 +79,118 @@ labels_windows = labels["label"].values[WINDOW_SIZE - 1:]
 print(f"\nLabels alignés : {labels_windows.shape}")
 print(f"Anomalies : {labels_windows.sum()}")
 
+print("\n" + "="*60)
+print("SECTION 3 : FEATURE ENGINEERING")
+print("="*60)
 
+ROLLING_WINDOW = 19
+def add_features(data):
+    features = [data]
 
+    rolling_mean = data.rolling(window=ROLLING_WINDOW, min_periods=1).mean()
+    rolling_mean.columns = [f"{c}_mean" for c in data.columns]
+    features.append(rolling_mean)
 
+    rolling_std = data.rolling(window=ROLLING_WINDOW, min_periods=1).std().fillna(0)
+    rolling_std.columns = [f"{c}_std" for c in data.columns]
+    features.append(rolling_std)
 
+    diff = data.diff().fillna(0)
+    diff.columns = [f"{c}_diff" for c in data.columns]
+    features.append(diff)
 
+    return pd.concat(features, axis=1)
 
+train_engineered = add_features(train_selected)
+test_engineered = add_features(test_selected)
 
-                   
+print(f"\nDimensions avant : {train_selected.shape}")
+print(f"Dimensions aprés : {train_engineered.shape}")
+print(f"\nExemple de nouvelles colonnes :")
+print(train_engineered.columns.tolist()[30:36])
+
+train_eng_values = train_engineered.astype(np.float64).values
+test_eng_values = test_engineered.astype(np.float64).values
+
+train_eng_windows = create_windows(train_eng_values, WINDOW_SIZE)
+test_eng_winddows = create_windows(test_eng_values, WINDOW_SIZE)
+
+print(f"\nFenêtres enrichies :")
+print(f"  Train: {train_eng_windows.shape}")
+print(f"  Test:  {test_eng_winddows.shape}")
+
+print("\n" + "="*60)
+print("SECTION 4 : NORMALISATION")
+print("="*60)
+
+from sklearn.preprocessing import StandardScaler
+
+scaler_if = StandardScaler()
+train_if = scaler_if.fit_transform(train_eng_values)
+test_if = scaler_if.transform(test_eng_values)
+
+print(f"\nPour Isolation Forest (2D) :")
+print(f"  Train : {train_if.shape}")
+print(f"  Test  : {test_if.shape}")
+print(f"  Moyenne :  {train_if.mean():.4f}")
+print(f"  Std     : {train_if.std():.4f}")
+
+scaler_lstm = StandardScaler()
+train_orig_scaled = scaler_lstm.fit_transform(train_selected.astype(np.float64).values)
+test_orig_scaled = scaler_lstm.transform(test_selected.astype(np.float64).values)
+
+train_lstm = create_windows(train_orig_scaled, WINDOW_SIZE)
+test_lstm = create_windows(test_orig_scaled, WINDOW_SIZE)
+
+print(f"\nPour Autoencoder LSTM (3D) :")
+print(f"  Train : {train_lstm.shape}")
+print(f"  Test  : {test_lstm.shape}")
+
+print("\n" + "="*60)
+print("SECTION 5 : DÉCOUPAGE TRAIN / VALIDATION")
+print("="*60)
+
+SPLIT = 0.8
+
+split_if = int(len(train_if) * SPLIT)
+X_train_if =  train_if[:split_if]
+X_val_if = train_if[split_if:]
+
+split_lstm = int(len(train_lstm) * SPLIT)
+X_train_lstm = train_lstm[:split_lstm]
+X_val_lstm = train_lstm[split_lstm:]
+
+print(f"\nIsolation Forest : ")
+print(f"  Train : {X_train_if.shape}")
+print(f"  Val   : {X_val_if.shape} ")
+
+print(f"\nAutoencoder LSTM :")
+print(f"  Train : {X_train_lstm.shape}")
+print(f"  Val   : {X_val_lstm.shape}")
+
+print("\n" + "="*60)
+print("SECTION 6 : SAUVEGARDE")
+print("="*60)
+
+import joblib
+
+SAVE_DIR = os.path.join("outputs", "preprocessed")
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+np.save(os.path.join(SAVE_DIR, "X_train_if.npy"), X_train_if)
+np.save(os.path.join(SAVE_DIR, "X_val_if.npy"), X_val_if)
+np.save(os.path.join(SAVE_DIR, "test_if.npy"), test_if)
+
+np.save(os.path.join(SAVE_DIR, "X_train_lstm.npy"), X_train_lstm)
+np.save(os.path.join(SAVE_DIR, "X_val_lstm.npy"), X_val_lstm)
+np.save(os.path.join(SAVE_DIR, "test_lstm.npy"), test_lstm)
+
+np.save(os.path.join(SAVE_DIR, "labels.npy"), labels_windows)
+
+joblib.dump(scaler_if, os.path.join(SAVE_DIR, "scaler_if.pkl"))
+joblib.dump(scaler_lstm, os.path.join(SAVE_DIR, "scaler_lstm.pkl"))
+
+print(f"\nFichier sauvegardés dans {SAVE_DIR}/ :")
+for f in os.listdir(SAVE_DIR):
+    size = os.path.getsize(os.path.join(SAVE_DIR, f)) / 1024 / 1024
+    print(f"{f} '{size:.1f} MB")
