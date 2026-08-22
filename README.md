@@ -1,7 +1,7 @@
 # Performance Degradation Prediction — ML Pipeline
 
 > Système de détection de dégradation de performance applicative basé sur le Machine Learning  
-> **Amine El-Baydaouy** — Étudiant ingénieur Data Science & IA, ENSAM Rabat — Stage BunionTech 2025
+> **Amine El-Baydaouy** — Étudiant ingénieur Data Science & IA, ENSAM Rabat — Stage BunionTech 2026
 
 ---
 
@@ -215,4 +215,4 @@ degradation_prediction/
 **Amine El-Baydaouy**  
 Étudiant ingénieur — Data Science & Intelligence Artificielle  
 ENSAM Rabat — Université Mohammed V  
-Stage d'initiation chez **BunionTech** — 2025
+Stage d'initiation chez **BunionTech** — 2026
