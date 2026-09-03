@@ -194,3 +194,4 @@ print(f"\nFichier sauvegardés dans {SAVE_DIR}/ :")
 for f in os.listdir(SAVE_DIR):
     size = os.path.getsize(os.path.join(SAVE_DIR, f)) / 1024 / 1024
     print(f"{f} '{size:.1f} MB")
+    

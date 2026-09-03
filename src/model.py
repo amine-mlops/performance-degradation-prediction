@@ -92,9 +92,6 @@ print(f"Faux positifs   : {cm[0][1]}")
 print(f"Faux négatifs   : {cm[1][0]}")
 print(f"Vrais négatifs  : {cm[0][0]}")
 
-# ─────────────────────────────────────────────
-# SAUVEGARDE
-# ─────────────────────────────────────────────
 import joblib
 
 MODEL_DIR = os.path.join("outputs", "models")
