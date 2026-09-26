@@ -82,13 +82,13 @@ Dashboard (Streamlit)
 ## Dashboard
 
 ### Anomaly history
-![Dashboard - History](images/screen3.png)
+![Dashboard - History](images/dashboard3.jpeg)
 
 ### Temporal visualization of metrics
-![Dashboard - Charts](images/screen2.png)
+![Dashboard - Charts](images/dashboard2.jpeg)
 
 ### Global KPIs and real-time analysis
-![Dashboard - KPIs and analysis](images/screen1.png)
+![Dashboard - KPIs and analysis](images/dashboard1.jpeg)
 
 ---
 
